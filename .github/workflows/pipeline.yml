@@ -1,0 +1,32 @@
+name: CI-CD DevSecOps
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Build Docker image
+      run: docker build -t empresa-app .
+
+    - name: Install Trivy
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y apt-transport-https gnupg lsb-release
+        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+        echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+        sudo apt-get update
+        sudo apt-get install -y trivy
+
+    - name: Security scan
+      run: trivy image --exit-code 1 --severity CRITICAL empresa-app
+
+    - name: Deploy (simulado)
+      run: echo "🚀 Deploy completado"
+
