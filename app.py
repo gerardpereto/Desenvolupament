@@ -1,0 +1,1 @@
+password = "gerard" print(password)
